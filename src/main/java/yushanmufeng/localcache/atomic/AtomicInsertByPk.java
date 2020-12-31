@@ -7,7 +7,6 @@ import yushanmufeng.localcache.EntityCacheManager;
 import yushanmufeng.localcache.SingleTableAtomicLogic;
 import yushanmufeng.localcache.TableDescribe;
 import yushanmufeng.localcache.task.TaskContext;
-import yushanmufeng.localcache.WorkingLogic;
 import yushanmufeng.localcache.task.MergingFutureTask;
 import yushanmufeng.localcache.task.MergingTaskFactory;
 

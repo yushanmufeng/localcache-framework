@@ -5,7 +5,6 @@ import yushanmufeng.localcache.util.SimpleTaskExecutor;
 import yushanmufeng.localcache.CacheKey;
 import yushanmufeng.localcache.Cacheable;
 import yushanmufeng.localcache.TableDescribe;
-import yushanmufeng.localcache.WorkingLogic;
 import yushanmufeng.localcache.task.MergingFutureTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,5 +1,6 @@
 package yushanmufeng.localcache;
 
+import yushanmufeng.localcache.datasource.TableDataSource;
 import yushanmufeng.localcache.util.MapRandomAccessUtil;
 import yushanmufeng.localcache.util.SimpleTaskExecutor;
 import yushanmufeng.localcache.config.EmptyExpireRateLoader;

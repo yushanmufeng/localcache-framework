@@ -1,5 +1,6 @@
-package yushanmufeng.localcache;
+package yushanmufeng.localcache.atomic;
 
+import yushanmufeng.localcache.Cacheable;
 import yushanmufeng.localcache.task.MergingFutureTask;
 import yushanmufeng.localcache.util.SimpleTaskExecutor;
 

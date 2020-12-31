@@ -4,7 +4,6 @@ import yushanmufeng.localcache.CacheKey;
 import yushanmufeng.localcache.Cacheable;
 import yushanmufeng.localcache.EntityCacheManager;
 import yushanmufeng.localcache.TableDescribe;
-import yushanmufeng.localcache.WorkingLogic;
 
 import java.util.ArrayList;
 import java.util.List;

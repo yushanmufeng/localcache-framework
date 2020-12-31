@@ -2,7 +2,6 @@ package yushanmufeng.localcache.atomic;
 
 import yushanmufeng.localcache.CacheKey;
 import yushanmufeng.localcache.Cacheable;
-import yushanmufeng.localcache.WorkingLogic;
 
 import java.util.List;
 import java.util.Map;

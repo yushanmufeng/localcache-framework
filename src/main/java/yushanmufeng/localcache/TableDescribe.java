@@ -2,6 +2,7 @@ package yushanmufeng.localcache;
 
 import yushanmufeng.localcache.config.LocalCacheConfig;
 import org.apache.lucene.util.RamUsageEstimator;
+import yushanmufeng.localcache.datasource.TableDataSource;
 
 import java.lang.reflect.Field;
 import java.text.DecimalFormat;
