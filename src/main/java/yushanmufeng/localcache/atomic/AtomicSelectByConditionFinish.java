@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 根据主键查询成功
+ * 根据条件查询成功
  */
 public class AtomicSelectByConditionFinish implements IAtomicLogic{
 
@@ -26,7 +26,7 @@ public class AtomicSelectByConditionFinish implements IAtomicLogic{
     }
 
     @Override
-    public void handle(CacheKey key, Cacheable entity, List<Cacheable> entities) {
+    public void handle(CacheKey key, List<CacheKey> keyList, Cacheable entity, List<Cacheable> entities) {
         List<Object> pks = cache.getByCondition(tableDesc, key, true);    // 优先使用缓存
         if(pks == null){   // 缓存未命中, 使用db查询结果并更新缓存
             pks = new ArrayList<>();

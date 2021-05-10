@@ -22,7 +22,7 @@ public class AtomicUnloadReferCache implements IAtomicLogic{
     }
 
     @Override
-    public void handle(CacheKey key, Cacheable entity, List<Cacheable> entities) {
+    public void handle(CacheKey key, List<CacheKey> keyList, Cacheable entity, List<Cacheable> entities) {
         // 删除条件查询缓存
         List<CacheKey> conditionKeys = tableDesc.tableStrategy.getConditionKeys(entity);
         if(conditionKeys != null && conditionKeys.size() > 0){

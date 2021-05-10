@@ -10,10 +10,7 @@ import yushanmufeng.localcache.task.TaskContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -84,6 +81,8 @@ public class SingleTableAtomicLogic {
         logicsMap.put(IAtomicLogic.DELETE_BY_PK, new AtomicDeleteByPk(this, tableDesc, cache, nonSelectExecutors, workingLogics));
         // 根据主键删除-完成
         logicsMap.put(IAtomicLogic.DELETE_BY_PK_FINISH, new AtomicDeleteByPkFinish(workingLogics));
+        // 根据多个主键查询缓存
+        logicsMap.put(IAtomicLogic.SELECT_BY_PKS_FROM_CACHE, new AtomicSelectByPksFromCache(tableDesc, cache));
         // 根据条件查询
         logicsMap.put(IAtomicLogic.SELECT_BY_CONDITION, new AtomicSelectByCondition(tableDesc, cache, selectExecutors, nonSelectExecutors, workingLogics));
         // 根据条件查询-完成
@@ -99,13 +98,13 @@ public class SingleTableAtomicLogic {
     /** 根据主键查询入口 */
     public Cacheable getByPK(Object pk){
         CacheKey cacheKey = new CacheKey(true, pk);
-        exec(IAtomicLogic.SELECT_BY_PK, cacheKey, null, null);
+        exec(IAtomicLogic.SELECT_BY_PK, cacheKey, null, null, null);
         Cacheable entity = IAtomicLogic.entityLocal.get();
         if(entity == null){
             MergingFutureTask<?> futureTask = IAtomicLogic.futureTaskLocal.get();
             if(futureTask != null) {
                 try {
-                    exec(IAtomicLogic.SELECT_BY_PK_FINISH, cacheKey, (Cacheable) futureTask.get(), null);
+                    exec(IAtomicLogic.SELECT_BY_PK_FINISH, cacheKey, null, (Cacheable) futureTask.get(), null);
                 } catch (Exception e) {
                     log.error("Select " + tableDesc.tableStrategy.getEntityClass().getSimpleName() + " By Pk Is Error,pk: " + pk, e);
                     throw new RuntimeException(e);
@@ -117,16 +116,16 @@ public class SingleTableAtomicLogic {
         return entity;
     }
 
-    /** 根据条件擦汗寻入口 */
+    /** 根据条件查寻入口 */
     public Map<Object, Cacheable> getByCondition(CacheKey cacheKey){
-        exec(IAtomicLogic.SELECT_BY_CONDITION, cacheKey, null, null);
+        exec(IAtomicLogic.SELECT_BY_CONDITION, cacheKey, null, null, null);
         List<Object> pks = IAtomicLogic.pksLocal.get(); // 命中缓存
         if(pks == null){
             // 未命中缓存，等待异步执行查询db任务返回结果
             MergingFutureTask<List<Cacheable>> futureTask = (MergingFutureTask<List<Cacheable>>)IAtomicLogic.futureTaskLocal.get();
             try {
                 List<Cacheable> entitiesFromDb = futureTask.get();
-                exec(IAtomicLogic.SELECT_BY_CONDITION_FINISH, cacheKey, null, entitiesFromDb);
+                exec(IAtomicLogic.SELECT_BY_CONDITION_FINISH, cacheKey, null, null, entitiesFromDb);
             }catch (Exception e){
                 log.error( "Select "+ tableDesc.tableStrategy.getEntityClass().getSimpleName() +" By Condition Is Error,condition: " + cacheKey.toString(), e);
                 throw new RuntimeException(e);
@@ -134,9 +133,17 @@ public class SingleTableAtomicLogic {
             pks = IAtomicLogic.pksLocal.get();
         }
         Map<Object, Cacheable> entitiesMap = new LinkedHashMap<>();
-        if(pks != null){
+        if(pks != null && pks.size() > 0){
+            // 先统一从缓存尝试获取一次，缓存中没有的再去单独读取，来减少加锁次数
+            List<CacheKey> keyList = new ArrayList<>();
             for(Object pk : pks){
-                entitiesMap.put(pk, getByPK(pk));
+                keyList.add(new CacheKey(true, pk));
+            }
+            exec(IAtomicLogic.SELECT_BY_PKS_FROM_CACHE, null, keyList, null, null);
+            Map<Object, Cacheable> entitiesFromCache = IAtomicLogic.entitiesLocal.get();
+            for(Object pk : pks){
+                Cacheable entity = entitiesFromCache.get(pk);
+                entitiesMap.put(pk, entity != null ? entity : getByPK(pk));
             }
         }
         IAtomicLogic.clearLocal();
@@ -145,7 +152,7 @@ public class SingleTableAtomicLogic {
 
     /** 插入实体对象入口 */
     public Cacheable insertEntity(Cacheable entity){
-        exec(IAtomicLogic.INSERT_BY_PK, new CacheKey(true, tableDesc.tableStrategy.getPrimaryKey(entity)), entity, null);
+        exec(IAtomicLogic.INSERT_BY_PK, new CacheKey(true, tableDesc.tableStrategy.getPrimaryKey(entity)), null, entity, null);
         Cacheable result = IAtomicLogic.entityLocal.get();
         IAtomicLogic.clearLocal();
         return result;
@@ -153,19 +160,19 @@ public class SingleTableAtomicLogic {
 
     /** 更新实体对象入口 */
     public void updateEntity(Cacheable entity){
-        exec(IAtomicLogic.UPDATE_BY_PK, new CacheKey(true, tableDesc.tableStrategy.getPrimaryKey(entity)), entity, null);
+        exec(IAtomicLogic.UPDATE_BY_PK, new CacheKey(true, tableDesc.tableStrategy.getPrimaryKey(entity)), null, entity, null);
         IAtomicLogic.clearLocal();
     }
 
     /** 删除实体对象入口 */
     public void deleteEntity(Cacheable entity){
-        exec(IAtomicLogic.DELETE_BY_PK, new CacheKey(true, tableDesc.tableStrategy.getPrimaryKey(entity)), entity, null);
+        exec(IAtomicLogic.DELETE_BY_PK, new CacheKey(true, tableDesc.tableStrategy.getPrimaryKey(entity)), null, entity, null);
         IAtomicLogic.clearLocal();
     }
 
     /** 卸载缓存 */
     public void unloadReferCache(Cacheable entity){
-        exec(IAtomicLogic.UNLOAD_REFER_CACHE, null, entity, null);
+        exec(IAtomicLogic.UNLOAD_REFER_CACHE, null, null, entity, null);
     }
 
     /**
@@ -176,19 +183,21 @@ public class SingleTableAtomicLogic {
      *
      * @param  execType 操作类型
      * @param  key 查询条件
+     * @param  keyList 查询条件列表
      * @param  entity 实体对象
      * @param  entities 实体对象（条件查询结果）
      * @return 返回对象类型与执行的任务类型相关
      */
-    public void exec(int execType, CacheKey key, Cacheable entity, List<Cacheable> entities){
+    public void exec(int execType, CacheKey key, List<CacheKey> keyList, Cacheable entity, List<Cacheable> entities){
         // ======== 原子操作start ========
         boolean isBusyEnd;
         boolean isBusyStart = lock.lock();
         try{
-            logicsMap.get(execType).handle(key, entity, entities);
+            logicsMap.get(execType).handle(key, keyList, entity, entities);
         }catch(Exception e) {
             String message = "ExecType:" + execType + ",table:" + tableDesc.entityName + ",CacheKey:" + (key==null?"null":key.toString());
             log.error(message, e);
+            IAtomicLogic.clearLocal();
             throw new RuntimeException(message, e);
         }finally {
             isBusyEnd = lock.unlock();

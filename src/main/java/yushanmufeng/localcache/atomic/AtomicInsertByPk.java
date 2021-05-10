@@ -35,7 +35,7 @@ public class AtomicInsertByPk implements IAtomicLogic{
     }
 
     @Override
-    public void handle(CacheKey key, Cacheable entity, List<Cacheable> entities) {
+    public void handle(CacheKey key, List<CacheKey> keyList, Cacheable entity, List<Cacheable> entities) {
         WorkingLogic workingLogic = workingLogics.get(key);
         Cacheable cacheEntity = cache.getByPK(tableDesc, key, false);
         int curState = getCurState(workingLogic);

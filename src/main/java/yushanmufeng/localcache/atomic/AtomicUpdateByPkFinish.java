@@ -18,7 +18,7 @@ public class AtomicUpdateByPkFinish implements IAtomicLogic{
     }
 
     @Override
-    public void handle(CacheKey key, Cacheable entity, List<Cacheable> entities) {
+    public void handle(CacheKey key, List<CacheKey> keyList, Cacheable entity, List<Cacheable> entities) {
         WorkingLogic workingLogic = workingLogics.get(key);
         // 删除掉一条更新记录
         workingLogic.updatingCount --;

@@ -34,7 +34,7 @@ public class AtomicSelectByCondition implements IAtomicLogic{
 
     @SuppressWarnings(value={"unchecked", "rawtypes"})
     @Override
-    public void handle(CacheKey key, Cacheable entity, List<Cacheable> entities) {
+    public void handle(CacheKey key, List<CacheKey> keyList, Cacheable entity, List<Cacheable> entities) {
         WorkingLogic workingLogic = workingLogics.get(key);
         List<Object> cachePks = cache.getByCondition(tableDesc, key, false);
         if(cachePks != null){   // 有缓存，直接使用缓存

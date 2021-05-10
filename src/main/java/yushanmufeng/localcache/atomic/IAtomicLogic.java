@@ -9,6 +9,7 @@ import yushanmufeng.localcache.task.MergingFutureTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.List;
+import java.util.Map;
 
 /** 核心原子操作逻辑,每种操作类型都要分别实现此接口用于处理各种操作,且方法中的操作均为内存操作，耗时DB任务要提交到处理线程中执行 */
 public interface IAtomicLogic {
@@ -19,11 +20,13 @@ public interface IAtomicLogic {
     ThreadLocal<MergingFutureTask<?>> futureTaskLocal = new ThreadLocal<>();
     ThreadLocal<Cacheable> entityLocal = new ThreadLocal<>();
     ThreadLocal<List<Object>> pksLocal = new ThreadLocal<>();
+    ThreadLocal<Map<Object, Cacheable>> entitiesLocal = new ThreadLocal<>();
 
     static void clearLocal(){
         futureTaskLocal.remove();
         entityLocal.remove();
         pksLocal.remove();
+        entitiesLocal.remove();
     }
 
     /** 空任务,用于标志结束队列 */
@@ -44,19 +47,21 @@ public interface IAtomicLogic {
     int SELECT_BY_PK = 7;
     /** 根据主键查单完成 */
     int SELECT_BY_PK_FINISH = 8;
+    /** 根据多个主键查询缓存 */
+    int SELECT_BY_PKS_FROM_CACHE = 9;
     /** 根据条件查询一组数据 */
-    int SELECT_BY_CONDITION = 9;
+    int SELECT_BY_CONDITION = 10;
     /** 根据条件查询一组数据完成 */
-    int SELECT_BY_CONDITION_FINISH = 10;
+    int SELECT_BY_CONDITION_FINISH = 11;
     /** 卸载关联的缓存 */
-    int UNLOAD_REFER_CACHE = 11;
+    int UNLOAD_REFER_CACHE = 12;
     /** 计算汇总缓存使用的内存大小 */
-    int SUM_MEM_BYTES = 12;
+    int SUM_MEM_BYTES = 13;
     /** 检测缓存过期 */
-    int CHECK_CACHE_EXPIRE = 13;
+    int CHECK_CACHE_EXPIRE = 14;
 
     /** 处理原子操作方法 */
-    void handle(CacheKey key, Cacheable entity, List<Cacheable> entities);
+    void handle(CacheKey key, List<CacheKey> keyList, Cacheable entity, List<Cacheable> entities);
 
     /**
      * 计算当前最新状态
@@ -74,7 +79,5 @@ public interface IAtomicLogic {
     default <V extends Runnable> SimpleTaskExecutor<V> getLoadLowestExecutor(SimpleTaskExecutor<V>[] executors, TableDescribe<Cacheable> tableDesc){
         return SimpleTaskExecutor.getLoadLowestExecutor(executors, HashUtil.hash(tableDesc, executors.length));
     }
-
-
 
 }

@@ -79,7 +79,7 @@ public class MergingTaskFactory {
         return new MergingFutureTask<>(new MergingCallable<Cacheable>(IAtomicLogic.UPDATE_BY_PK, executor, tableDesc, context, key, entity) {
             @Override
             public Cacheable subCall2() {
-                atomicLogic.exec(IAtomicLogic.UPDATE_BY_PK_FINISH, key, entity, null);
+                atomicLogic.exec(IAtomicLogic.UPDATE_BY_PK_FINISH, key, null, entity, null);
                 return null;
             }
         });
@@ -90,7 +90,7 @@ public class MergingTaskFactory {
         return new MergingFutureTask<>(new MergingCallable<Cacheable>(IAtomicLogic.INSERT_BY_PK, executor, tableDesc, context, key, entity) {
             @Override
             public Cacheable subCall2() {
-                atomicLogic.exec(IAtomicLogic.INSERT_BY_PK_FINISH, key, entity, null);
+                atomicLogic.exec(IAtomicLogic.INSERT_BY_PK_FINISH, key, null, entity, null);
                 return null;
             }
         });
@@ -101,7 +101,7 @@ public class MergingTaskFactory {
         return new MergingFutureTask<>(new MergingCallable<Cacheable>(IAtomicLogic.DELETE_BY_PK, executor, tableDesc, context, key, entity) {
             @Override
             public Cacheable subCall2() {
-                atomicLogic.exec(IAtomicLogic.DELETE_BY_PK_FINISH, key, entity, null);
+                atomicLogic.exec(IAtomicLogic.DELETE_BY_PK_FINISH, key, null, entity, null);
                 return null;
             }
         });
@@ -112,7 +112,7 @@ public class MergingTaskFactory {
         return new MergingFutureTask<>(new MergingCallable<Cacheable>(IAtomicLogic.SUM_MEM_BYTES, executor, tableDesc, context, null, null) {
             @Override
             public Cacheable subCall2() {
-                atomicLogic.exec(IAtomicLogic.SUM_MEM_BYTES, null, null, null);
+                atomicLogic.exec(IAtomicLogic.SUM_MEM_BYTES, null, null, null, null);
                 return null;
             }
         });
@@ -123,7 +123,7 @@ public class MergingTaskFactory {
         return new MergingFutureTask<>(new MergingCallable<Cacheable>(IAtomicLogic.CHECK_CACHE_EXPIRE, executor, tableDesc, context, null, null) {
             @Override
             public Cacheable subCall2() {
-                atomicLogic.exec(IAtomicLogic.CHECK_CACHE_EXPIRE, null, null, null);
+                atomicLogic.exec(IAtomicLogic.CHECK_CACHE_EXPIRE, null, null, null, null);
                 return null;
             }
         });

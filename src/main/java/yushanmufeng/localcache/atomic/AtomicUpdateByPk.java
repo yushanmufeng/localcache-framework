@@ -35,7 +35,7 @@ public class AtomicUpdateByPk implements IAtomicLogic{
     }
 
     @Override
-    public void handle(CacheKey key, Cacheable entity, List<Cacheable> entities) {
+    public void handle(CacheKey key, List<CacheKey> keyList, Cacheable entity, List<Cacheable> entities) {
         WorkingLogic workingLogic = workingLogics.get(key);
         int curState = getCurState(workingLogic);
         if(entity._getStatus()==EntityState.DELETED||entity._getStatus()==EntityState.GET_READY){   // 数据异常

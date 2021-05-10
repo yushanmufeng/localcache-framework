@@ -34,7 +34,7 @@ public class AtomicSelectByPk implements IAtomicLogic{
 
     @SuppressWarnings(value={"unchecked", "rawtypes"})
     @Override
-    public void handle(CacheKey key, Cacheable entity, List<Cacheable> entities) {
+    public void handle(CacheKey key, List<CacheKey> keyList, Cacheable entity, List<Cacheable> entities) {
         WorkingLogic workingLogic = workingLogics.get(key);
         int curState = getCurState(workingLogic);
         // 优先检测冲突状态：插入和删除。查询不改变冲突状态仅做合并来提升并发查询效率

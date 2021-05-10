@@ -19,7 +19,7 @@ public class AtomicInsertByPkFinish implements IAtomicLogic{
     }
 
     @Override
-    public void handle(CacheKey key, Cacheable entity, List<Cacheable> entities) {
+    public void handle(CacheKey key, List<CacheKey> keyList, Cacheable entity, List<Cacheable> entities) {
         WorkingLogic workingLogic = workingLogics.get(key);
         // 删除掉一条插入记录
         workingLogic.insertingCount --;

@@ -21,7 +21,7 @@ public class AtomicSumMemBytes implements IAtomicLogic{
     }
 
     @Override
-    public void handle(CacheKey key, Cacheable entity, List<Cacheable> entities) {
+    public void handle(CacheKey key, List<CacheKey> keyList, Cacheable entity, List<Cacheable> entities) {
         cache.sumMem(tableDesc);
     }
 
